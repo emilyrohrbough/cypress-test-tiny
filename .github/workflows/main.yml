@@ -1,23 +1,24 @@
 name: Cypress Tests
 on: [push]
+env:
+  CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
 jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Validate
-        run: echo "$CYPRESS_RECORD_KEY && $CYPRESS_INTERNAL_ENV"
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          CYPRESS_INTERNAL_ENV: 'development'
+      - name: Check for record key
+        id: record-key-check
+        run: |
+          if [ "${{ secrets.CYPRESS_RECORD_KEY }}" != '' ]; then
+            echo "defined=true" >> $GITHUB_OUTPUT;
+          else
+            echo "defined=false" >> $GITHUB_OUTPUT;
+          fi
       - name: Cypress run
         # Uses the official Cypress GitHub action https://github.com/cypress-io/github-action
         uses: cypress-io/github-action@v6
         with:
           config: projectId=f83ivd
           record: true
-        env:
-          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
-          CYPRESS_INTERNAL_ENV: 'development'
